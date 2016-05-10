@@ -1,0 +1,18 @@
+function [ probability ] = likelihood( cipher, ciphered_text)
+%UNTITLED3 Summary of this function goes here
+%   Detailed explanation goes here
+    load('language_parameters.mat', 'alphabet');
+    load('language_parameters.mat', 'letter_probabilities');
+    load('language_parameters.mat', 'letter_transition_matrix');
+    
+    anticipher = [];
+    for i = 1:length(cipher)
+        anticipher(i) = find(alphabet(i) == cipher);
+    end
+    
+    anticipher_cell = cell(28,1);
+    for i = 1:length(anticipher)
+        anticipher_cell(alphabet(i)) = anticipher(i);
+
+end
+
