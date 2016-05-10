@@ -53,7 +53,7 @@ function [answer] = decode(ciphered_text, filename)
     answer = [100,1];
     switches = [100,1];
     accuracies = [100,1];
-    for i = 1:100
+    for i = 1:2
         l_1 = likelihood(current_cipher);
         accuracies(i) = accuracy(current_cipher);
         answer(i) = l_1;
@@ -76,7 +76,7 @@ function [answer] = decode(ciphered_text, filename)
         end
     end
     acceptances = [100,1];
-    for i = 1:100
+    for i = 1:2
         acceptances(i) = 0;
         if i < 11
             for j = 1:i
@@ -91,4 +91,8 @@ function [answer] = decode(ciphered_text, filename)
         end
     end
     answer = accuracies;
+    fileID = fopen(filename,'w');
+    fprintf(fileID,'cat');
+    fclose(fileID);
+    fprintf(
 end
