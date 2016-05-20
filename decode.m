@@ -16,7 +16,7 @@ function [answer] = decode(ciphered_text, filename)
 
         anticipher_map = containers.Map;
         for index = 1:length(anticipher)
-            anticipher_map(alphabet(index)) = anticipher(index);
+            anticipher_map(alphabet(index)) = find(cipher(index) == alphabet);
         end
 
         log_probability = -1 * log(letter_probabilities(anticipher_map(ciphered_text(1))));
@@ -74,24 +74,11 @@ function [answer] = decode(ciphered_text, filename)
                 switches(i) = 1;
             end
         end
-    end
-    acceptances = [100,1];
-    for i = 1:2
-        acceptances(i) = 0;
-        if i < 11
-            for j = 1:i
-                acceptances(i) = acceptances(i) + switches(j);
-            end
-            acceptances(i)  = acceptances(i) / i;
-        else
-            for j = (i-9):i
-                acceptances(i) = acceptances(i) + switches(j);
-            end
-            acceptances(i)  = acceptances(i) / 10;
-        end
-    end
+    end    
     answer = accuracies;
     fileID = fopen(filename,'w');
-    fprintf(fileID,'cat');
+    for i = 1:n
+        fprintf(fileID, ciphered_text(i));
+    end
     fclose(fileID);
 end
