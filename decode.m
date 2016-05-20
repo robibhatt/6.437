@@ -6,23 +6,41 @@ function [answer] = decode(ciphered_text, filename)
     load('language_parameters.mat', 'alphabet');
     load('language_parameters.mat', 'letter_probabilities');
     load('language_parameters.mat', 'letter_transition_matrix');
-    [plaintext_length, n] = size(plaintext);
+    n = length(plaintext);
+    alphabet_map = containers.Map;
+    for index = 1:length(alphabet)
+        alphabet_map(alphabet(index)) = index;
+    end
+    function [answer] = anticipher_generate(cipher_to_anticipher)
+        anticipher = [28, 1];
+        for indexy = 1:length(cipher_to_anticipher)
+            anticipher(indexy) = find(alphabet(indexy) == cipher_to_anticipher);
+        end
+        anticipher_map = containers.Map;
+        for indexy = 1:length(anticipher)
+            anticipher_map(alphabet(indexy)) = find(cipher_to_anticipher(indexy) == alphabet);
+        end
+        answer = anticipher_map;
+    end
+    function [ letter ] = decipher(old_letter, anticipher_map)
+        letter = alphabet(anticipher_map(old_letter)); 
+    end
     function [ log_probability ] = likelihood(cipher)
 
         anticipher = [28,1];
-        for index = 1:length(cipher)
-            anticipher(index) = find(alphabet(index) == cipher);
+        for indexz = 1:length(cipher)
+            anticipher(indexz) = find(alphabet(indexz) == cipher);
         end
 
         anticipher_map = containers.Map;
-        for index = 1:length(anticipher)
-            anticipher_map(alphabet(index)) = find(cipher(index) == alphabet);
+        for indexz = 1:length(anticipher)
+            anticipher_map(alphabet(indexz)) = find(cipher(indexz) == alphabet);
         end
 
         log_probability = -1 * log(letter_probabilities(anticipher_map(ciphered_text(1))));
 
-        for index = 2:length(ciphered_text)
-            transition_probability = -1*log(letter_transition_matrix(anticipher_map(ciphered_text(index)),anticipher_map(ciphered_text(index-1))) + 10^(-10));
+        for indexz = 232:400
+            transition_probability = -1*log(letter_transition_matrix(anticipher_map(ciphered_text(indexz)),anticipher_map(ciphered_text(indexz-1))) + 10^(-10));
             log_probability = log_probability + transition_probability;
         end
 
@@ -40,45 +58,28 @@ function [answer] = decode(ciphered_text, filename)
         new_cipher(a) = cipher(b);
         new_cipher(b) = cipher(a);
     end
-    function [deciphered_text_rate] = accuracy(cipher)
-        count = 0;
-        for index = 1:28
-            if cipher(index) == cipher_function(index)
-                count = count + 1;
-            end
-        end
-        deciphered_text_rate = count / 28;
-    end
-    current_cipher = alphabet;
-    answer = [100,1];
-    switches = [100,1];
-    accuracies = [100,1];
-    for i = 1:2
+    current_cipher = cipher_function;
+    for i = 1:100
         l_1 = likelihood(current_cipher);
-        accuracies(i) = accuracy(current_cipher);
-        answer(i) = l_1;
         potential_cipher = next_cipher(current_cipher);
         l_2 = likelihood(potential_cipher);
-        switches(i) = 0;
         if isinf(l_1)
             current_cipher = potential_cipher;
-            switches(i) = 1;
         elseif l_2 <= l_1
             current_cipher = potential_cipher;
-            switches(i) = 1;
         else
             prob = 10^(l_1 - l_2);
             r = binornd(1, prob);
             if r == 1
                 current_cipher = potential_cipher;
-                switches(i) = 1;
             end
         end
     end    
-    answer = accuracies;
+    answer = 1;
     fileID = fopen(filename,'w');
     for i = 1:n
-        fprintf(fileID, ciphered_text(i));
+        anticipher_we_use = anticipher_generate(cipher_function);
+        fprintf(fileID, decipher(ciphered_text(i), anticipher_we_use));
     end
     fclose(fileID);
 end
